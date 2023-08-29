@@ -1,122 +1,86 @@
+import sys
 import random
-from amuse.community.arepo import Arepo
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import cm
+from amuse.community.arepo import Arepo
+from amuse.datamodel import Particles, Particle
 # import unit seconds as s
 
 N_PLOT_PARTICLES = 3000
 
-# Check code runs without errors
-x = Arepo(redirection="none")
-x.initialize_code()
+def plot_particles_3d(
+    plot_count, instance, tracked_ids,
+    vmin=0.1, vmax=100,
+):
+    time = instance.get_time()
+    x, y, z = instance.get_position(tracked_ids)
+    dens = instance.get_density(tracked_ids)
 
-n_particles_total = x.get_number_of_particles()
-print('AMUSE: number of particles: {}'.format(n_particles_total))
-random.seed(123)
-tracked_ids = random.sample(range(n_particles_total), k=N_PLOT_PARTICLES)
+    # for i in range(len(x)):
+    #     print(x[i], y[i], z[i], dens[i])
+    # sys.exit()
+    # positions = {
+    #     index: [instance.get_position(index)] for index in tracked_ids
+    # }
+    # densities = {
+    #     index: [instance.get_density(index)] for index in tracked_ids
+    # }
+    max_density = max(dens)  # densities.values())[0]
+    min_density = min(dens)  # densities.values())[0]
+    print(max_density, min_density)
+    fig, ax = plt.subplots(subplot_kw=dict(projection='3d',), figsize=(10, 7))
+    cmap = cm.plasma
+    plot = ax.scatter(
+        x, y, z,
+        c=dens,
+        cmap=cmap,
+        vmin=vmin,
+        vmax=vmax,
+        edgecolors='none',
+        s=5,
+    )
+    plt.colorbar(plot, ax=ax)
+    # for index, pos in positions.items():
+    #     ax.plot(
+    #         *np.array(pos).T,
+    #         color=cmap(
+    #             (densities[index] - min_density)
+    #             / (max_density - min_density)
+    #         )
+    #     )
+    ax.set_xlim((0, 6))
+    ax.set_ylim((0, 6))
+    ax.set_zlim((0, 6))
+    fig.suptitle(f"Densities at t = {time:04.2f}")
+    fig.savefig(f"noh_positions_{plot_count:04d}.png")
+    plt.close(fig)
+    return plot_count + 1
 
 
-def dist(p0, p1):
-    return np.linalg.norm(np.array(p1) - np.array(p0))
+def evolve(instance, target_time):
+    instance.evolve_model(target_time)
+    time = instance.get_time()
+    print(f"Evolving to time = {time:.4f} (offset from requested: {time - target_time:.4f})")
 
 
-positions = {id: [x.get_position(id)] for id in tracked_ids}
-print(x.get_position(30))
-
-print("Evolving")
-x.evolve_model(0.00001)
-
-for id in tracked_ids:
-    positions[id].append(x.get_position(id))
-
-print("Evolving another step")
-x.evolve_model(0.00002)
-
-final_densities = {}
-
-for id in tracked_ids:
-    positions[id].append(x.get_position(id))
-    final_densities[id] = x.get_density(id)
-
-max_density = max(final_densities.values())
-min_density = min(final_densities.values())
-
-for id, _ in zip(positions, range(5)):
-    print(id)
-    print(positions[id])
-    print(dist(positions[id][0], positions[id][-1]))
-    print()
+def main():
+    # Check code runs without errors
+    # instance = Arepo(redirection="none")
+    instance = Arepo(redirection="null")
+    instance.initialize_code()
+    
+    n_particles_total = instance.get_number_of_particles()
+    print(f'AMUSE: number of particles: {n_particles_total}')
+    random.seed(123)
+    tracked_ids = random.sample(range(n_particles_total), k=N_PLOT_PARTICLES)
+    
+    plot_count = 0
+    for t in np.linspace(0.1, 2, 240):
+        evolve(instance, t)
+        plot_count = plot_particles_3d(plot_count, instance, tracked_ids)
+    sys.exit()
 
 
-# Plot1
-fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
-cmap = cm.plasma
-for id, pos in positions.items():
-    ax.plot(*np.array(pos).T, color=cmap((final_densities[id] - min_density)/(max_density - min_density)))
-fig.suptitle("Densities: t = {}".format(x.get_time()))
-fig.savefig("noh_positions_0.png")
-
-# Second plot at t = 1
-print("Evolving another step")
-x.evolve_model(1.0 - 0.00005)
-
-for id in tracked_ids:
-    positions[id].append(x.get_position(id))
-
-x.evolve_model(1.0)
-
-final_densities = {}
-
-for id in tracked_ids:
-    positions[id].append(x.get_position(id))
-    final_densities[id] = x.get_density(id)
-
-max_density = max(final_densities.values())
-min_density = min(final_densities.values())
-
-for id, _ in zip(positions, range(5)):
-    print(id)
-    print(positions[id])
-    print(dist(positions[id][0], positions[id][-1]))
-    print()
-
-# Plot2
-fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
-cmap = cm.plasma
-for id, pos in positions.items():
-    ax.plot(*np.array(pos[-2:]).T, color=cmap((final_densities[id] - min_density)/(max_density - min_density)))
-fig.suptitle("Densities: t = {}".format(x.get_time()))
-fig.savefig("noh_positions_1.png")
-
-# Third plot at t = 2
-print("Evolving another step")
-x.evolve_model(1.9 - 0.00002)
-
-for id in tracked_ids:
-    positions[id].append(x.get_position(id))
-
-x.evolve_model(1.9)
-
-final_densities = {}
-
-for id in tracked_ids:
-    positions[id].append(x.get_position(id))
-    final_densities[id] = x.get_density(id)
-
-max_density = max(final_densities.values())
-min_density = min(final_densities.values())
-
-for id, _ in zip(positions, range(5)):
-    print(id)
-    print(positions[id])
-    print(dist(positions[id][0], positions[id][-1]))
-    print()
-
-# Plot2
-fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
-cmap = cm.plasma
-for id, pos in positions.items():
-    ax.plot(*np.array(pos[-2:]).T, color=cmap((final_densities[id] - min_density)/(max_density - min_density)))
-fig.suptitle("Densities: t = {}".format(x.get_time()))
-fig.savefig("noh_positions_2.png")
+if __name__ == "__main__":
+    main()
