@@ -36,6 +36,7 @@ class ArepoInterface(
         function.addParameter("index_of_the_particle", dtype="int32", direction=function.IN)
         function.addParameter("p", dtype="float64", direction=function.OUT)
         function.result_type = "int32"
+        function.can_handle_array = True
         return function
 
     @legacy_function
@@ -44,6 +45,7 @@ class ArepoInterface(
         function.addParameter("index_of_the_particle", dtype="int32", direction=function.IN)
         function.addParameter("rho", dtype="float64", direction=function.OUT)
         function.result_type = "int32"
+        function.can_handle_array = True
         return function
 
     # This function has been kept as a basic template for future functions.
