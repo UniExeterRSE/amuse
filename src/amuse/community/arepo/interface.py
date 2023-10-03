@@ -48,6 +48,19 @@ class ArepoInterface(
         function.can_handle_array = True
         return function
 
+    @legacy_function
+    def new_dm_particle():
+        function = LegacyFunctionSpecification()
+        function.can_handle_array = True
+        function.addParameter('index_of_the_particle', dtype='int32', direction=function.OUT)
+        for x in ['mass','x','y','z','vx','vy','vz']:
+            function.addParameter(x, dtype='float64', direction=function.IN)
+        function.result_type = 'int32'
+        return function
+
+    def new_particle(self, mass, x, y, z, vx, vy, vz):
+        return self.new_dm_particle(mass, x, y, z, vx, vy, vz)
+
     # This function has been kept as a basic template for future functions.
     # @legacy_function
     # def set_parameters():
@@ -80,3 +93,10 @@ class Arepo(GravitationalDynamics):
             (),
             (builder.ERROR_CODE)
         )
+
+    def define_state(self, handler):
+        GravitationalDynamics.define_state(self, handler)
+        
+        handler.add_method('EDIT', 'new_dm_particle')
+        handler.add_method('UPDATE', 'new_dm_particle')
+        handler.add_transition('RUN', 'UPDATE', 'new_dm_particle', False)

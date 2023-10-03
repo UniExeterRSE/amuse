@@ -20,6 +20,9 @@ using namespace std;
 map<MyIDType, size_t> ID_RLOOKUP;
 static void create_ID_reverse_lookup();
 
+long long dm_particles_in_buffer = 0;
+long long particle_id_counter = 0;
+map<long long, dynamics_state> dm_states;
 
 void set_default_parameters(){
   // Relevant files
@@ -254,6 +257,7 @@ int initialize_code(){
   // May not need to do this (we want AMUSE to manage this)
   // MPI_Bcast(&All, sizeof(struct global_data_all_processes), MPI_BYTE, 0, MPI_COMM_WORLD);
   begrun1(); /* set-up run  */
+  // this needs to be called by "commit_parameters" in AMUSE, transitioning EDIT->RUN
 
   char fname[MAXLEN_PATH];
   strcpy(fname, All.InitCondFile);
@@ -376,9 +380,27 @@ int get_total_radius(double * radius){
   return 0;
 }
 
-int new_particle(int * index_of_the_particle, double mass, double x,
+int new_dm_particle(int * index_of_the_particle, double mass, double x,
   double y, double z, double vx, double vy, double vz, double radius){
+  particle_id_counter++;
+  if (ThisTask == 0)
+      *id = particle_id_counter;
+
+  // Divide the particles equally over all Tasks, Gadget will redistribute them later.
+  if (ThisTask == (dm_particles_in_buffer % NTask)){
+      dynamics_state state;
+      state.mass = mass;
+      state.x = x;
+      state.y = y;
+      state.z = z;
+      state.vx = vx;
+      state.vy = vy;
+      state.vz = vz;
+      dm_states.insert(std::pair<long long, dynamics_state>(particle_id_counter, state));
+  }
+  dm_particles_in_buffer++;
   return 0;
+
 }
 
 int get_total_mass(double * mass){
