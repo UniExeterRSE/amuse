@@ -6,7 +6,7 @@ endif
 -include $(AMUSE_DIR)/config.mk
 
 ## examples/Noh_3d/Config.sh
-## config file for 3d Noh probelm
+## config file for 3d Noh problem
 
 #--------------------------------------- Basic operation mode of code
 AREPOFLAGS += -DREFLECTIVE_X=2                           # in-/outflow boundary conditions in x direction
