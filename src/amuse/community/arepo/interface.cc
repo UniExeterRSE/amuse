@@ -358,6 +358,51 @@ int get_mass(int index_of_the_particle, double * mass){
 }
 
 int commit_particles(){
+  // Refer to gadget2 interface.cc, also read_ic.c
+  double t0, t1;
+  int i, j;
+  All.TotNumPart = dm_particles_in_buffer; // TODO: Include sph_particles_in_buffer
+  All.TotN_gas = 0; // TODO: sph_particles_in_buffer
+  All.MaxPart = All.PartAllocFactor * (All.TotNumPart / NTask);
+  All.MaxPartSph = 0; // TODO:
+
+  NumPart = dm_states.size(); // TODO: sph_states.size()
+  N_gas = 0; // TODO:
+  allocate_memory();
+
+  // TODO: initialize sph particles
+  i = 0;
+
+  // initialize dark matter particles
+  i = 0; // TODO: N_gas
+  for (map<long long, dynamics_state>::iterator state_iter = dm_states.begin();
+          state_iter != dm_states.end(); state_iter++, i++){
+      P[i].ID = (*state_iter).first;
+      P[i].Mass = (*state_iter).second.mass;
+      P[i].Pos[0] = (*state_iter).second.x; // TODO: a_inv?
+      P[i].Pos[1] = (*state_iter).second.y;
+      P[i].Pos[2] = (*state_iter).second.z;
+      P[i].Vel[0] = (*state_iter).second.vx; // TODO: a?
+      P[i].Vel[1] = (*state_iter).second.vy;
+      P[i].Vel[2] = (*state_iter).second.vz;
+      P[i].Type = 1; // 1=halo type (dm)
+  }
+  dm_states.clear();
+  All.TimeBegin += All.Ti_Current * All.Timebase_interval; // TODO: Why?
+  All.Ti_Current = 0;
+  All.Time = All.TimeBegin;
+  set_softenings(); // TODO: Why?
+  for (i = 0; i < NumPart; i++){ // Start-up initialization
+      P[i].GravAccel[0] = 0;
+      P[i].GravAccel[1] = 0;
+      P[i].GravAccel[2] = 0;
+      // TODO: PMGRID?
+      // TODO: Ti_endstep? Ti_begstep?
+      P[i].OldAcc = 0;
+      P[i].GravCost = 1;
+      // TODO: Potential?
+  }
+
   return 0;
 }
 
@@ -386,7 +431,7 @@ int new_dm_particle(int * index_of_the_particle, double mass, double x,
   if (ThisTask == 0)
       *id = particle_id_counter;
 
-  // Divide the particles equally over all Tasks, Gadget will redistribute them later.
+  // Divide the particles equally over all Tasks, arepo will redistribute them later.
   if (ThisTask == (dm_particles_in_buffer % NTask)){
       dynamics_state state;
       state.mass = mass;
