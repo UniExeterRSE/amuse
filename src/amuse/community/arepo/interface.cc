@@ -367,7 +367,7 @@ int commit_particles(){
   All.MaxPartSph = 0; // TODO:
 
   NumPart = dm_states.size(); // TODO: sph_states.size()
-  N_gas = 0; // TODO:
+  // N_gas = 0; // TODO:
   allocate_memory();
 
   // TODO: initialize sph particles
@@ -399,11 +399,11 @@ int commit_particles(){
       // TODO: PMGRID?
       // TODO: Ti_endstep? Ti_begstep?
       P[i].OldAcc = 0;
-      P[i].GravCost = 1;
+      // P[i].GravCost = 1;
       // TODO: Potential?
   }
 
-  return 0;
+  return 0; // Here
 }
 
 int get_time(double * time){
@@ -429,7 +429,7 @@ int new_dm_particle(int * index_of_the_particle, double mass, double x,
   double y, double z, double vx, double vy, double vz, double radius){
   particle_id_counter++;
   if (ThisTask == 0)
-      *id = particle_id_counter;
+      *index_of_the_particle = particle_id_counter; // id undefined?
 
   // Divide the particles equally over all Tasks, arepo will redistribute them later.
   if (ThisTask == (dm_particles_in_buffer % NTask)){

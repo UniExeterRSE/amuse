@@ -253,7 +253,7 @@ void read_ic(const char *fname, int readTypes)
     {
       if(All.MassTable[P[i].Type] != 0)
         P[i].Mass = All.MassTable[P[i].Type];
-    }
+    } // TODO: Not applicable for amuse
 
     /* If we are reading in Gadget2 ICs, we need to compute the material
        number from the ID  */
@@ -428,7 +428,7 @@ void read_ic(const char *fname, int readTypes)
 
   u_init /= molecular_weight;
 
-  All.InitGasU = u_init;
+  All.InitGasU = u_init; // TODO: Don't need in amuse (amuse dictates this)
 
   header.mass[0]   = 0; /* to make sure that the variable masses are stored in output file */
   All.MassTable[0] = 0;
