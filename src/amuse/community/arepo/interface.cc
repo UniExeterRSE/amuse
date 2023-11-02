@@ -20,6 +20,9 @@ using namespace std;
 map<MyIDType, size_t> ID_RLOOKUP;
 static void create_ID_reverse_lookup();
 
+long long dm_particles_in_buffer = 0;
+long long particle_id_counter = 0;
+map<long long, dynamics_state> dm_states;
 
 void set_default_parameters(){
   // Relevant files
@@ -254,6 +257,7 @@ int initialize_code(){
   // May not need to do this (we want AMUSE to manage this)
   // MPI_Bcast(&All, sizeof(struct global_data_all_processes), MPI_BYTE, 0, MPI_COMM_WORLD);
   begrun1(); /* set-up run  */
+  // this needs to be called by "commit_parameters" in AMUSE, transitioning EDIT->RUN
 
   char fname[MAXLEN_PATH];
   strcpy(fname, All.InitCondFile);
@@ -354,7 +358,60 @@ int get_mass(int index_of_the_particle, double * mass){
 }
 
 int commit_particles(){
-  return 0;
+  // Refer to gadget2 interface.cc, also read_ic.c
+  double t0, t1;
+  int i, j;
+  All.TotNumPart = dm_particles_in_buffer; // TODO: Include sph_particles_in_buffer
+  All.TotNumGas = 0; // TODO: sph_particles_in_buffer
+  All.MaxPart = All.TreeAllocFactor * (All.TotNumPart / NTask); // TODO: Check TreeAllocFactor is right
+  All.MaxPartSph = 0; // TODO:
+
+  double a;
+  if (All.ComovingIntegrationOn) {
+    a = All.Time;
+  } else {
+    a = 1.0;
+  }
+  double a_inv = 1.0 / a;
+
+  NumPart = dm_states.size(); // TODO: sph_states.size()
+  // NumGas = 0; // TODO:
+  allocate_memory();
+
+  // TODO: initialize sph particles
+  i = 0;
+
+  // initialize dark matter particles
+  i = 0; // TODO: NumGas
+  for (map<long long, dynamics_state>::iterator state_iter = dm_states.begin();
+          state_iter != dm_states.end(); state_iter++, i++){
+      P[i].ID = (*state_iter).first;
+      P[i].Mass = (*state_iter).second.mass;
+      P[i].Pos[0] = (*state_iter).second.x * a_inv;
+      P[i].Pos[1] = (*state_iter).second.y * a_inv;
+      P[i].Pos[2] = (*state_iter).second.z * a_inv;
+      P[i].Vel[0] = (*state_iter).second.vx * a;
+      P[i].Vel[1] = (*state_iter).second.vy * a;
+      P[i].Vel[2] = (*state_iter).second.vz * a;
+      P[i].Type = 1; // 1=halo type (dm)
+  }
+  dm_states.clear();
+  All.TimeBegin += All.Ti_Current * All.Timebase_interval; // TODO: Why?
+  All.Ti_Current = 0;
+  All.Time = All.TimeBegin;
+  set_softenings(); // TODO: Why?
+  for (i = 0; i < NumPart; i++){ // Start-up initialization
+      P[i].GravAccel[0] = 0;
+      P[i].GravAccel[1] = 0;
+      P[i].GravAccel[2] = 0;
+      // TODO: PMGRID?
+      // TODO: Ti_endstep? Ti_begstep?
+      P[i].OldAcc = 0;
+      // P[i].GravCost = 1;
+      // TODO: Potential?
+  }
+
+  return 0; // Here
 }
 
 int get_time(double * time){
@@ -376,9 +433,27 @@ int get_total_radius(double * radius){
   return 0;
 }
 
-int new_particle(int * index_of_the_particle, double mass, double x,
-  double y, double z, double vx, double vy, double vz, double radius){
+int new_dm_particle(int * index_of_the_particle, double mass, double x,
+  double y, double z, double vx, double vy, double vz){
+  particle_id_counter++;
+  if (ThisTask == 0)
+      *index_of_the_particle = particle_id_counter; // id undefined?
+
+  // Divide the particles equally over all Tasks, arepo will redistribute them later.
+  if (ThisTask == (dm_particles_in_buffer % NTask)){
+      dynamics_state state;
+      state.mass = mass;
+      state.x = x;
+      state.y = y;
+      state.z = z;
+      state.vx = vx;
+      state.vy = vy;
+      state.vz = vz;
+      dm_states.insert(std::pair<long long, dynamics_state>(particle_id_counter, state));
+  }
+  dm_particles_in_buffer++;
   return 0;
+
 }
 
 int get_total_mass(double * mass){
