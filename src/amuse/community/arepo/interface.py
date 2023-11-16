@@ -6,6 +6,8 @@ from amuse.community import LiteratureReferencesMixIn
 from amuse.community.interface.gd import GravitationalDynamicsInterface
 from amuse.community.interface.gd import GravitationalDynamics
 
+from amuse.units import generic_unit_system
+
 
 class ArepoInterface(
     CodeInterface,
@@ -26,14 +28,18 @@ class ArepoInterface(
     include_headers = ["worker_code.h", "interface.h"]
 
     def __init__(self, **keyword_arguments):
-        CodeInterface.__init__(self, name_of_the_worker="arepo_worker", **keyword_arguments)
+        CodeInterface.__init__(
+            self, name_of_the_worker="arepo_worker", **keyword_arguments
+        )
         LiteratureReferencesMixIn.__init__(self)
         # TODO: Determine whether need to inherit from CodeWithDataDirectories.
 
     @legacy_function
     def get_pressure():
         function = LegacyFunctionSpecification()
-        function.addParameter("index_of_the_particle", dtype="int32", direction=function.IN)
+        function.addParameter(
+            "index_of_the_particle", dtype="int32", direction=function.IN
+        )
         function.addParameter("p", dtype="float64", direction=function.OUT)
         function.result_type = "int32"
         function.can_handle_array = True
@@ -42,7 +48,9 @@ class ArepoInterface(
     @legacy_function
     def get_density():
         function = LegacyFunctionSpecification()
-        function.addParameter("index_of_the_particle", dtype="int32", direction=function.IN)
+        function.addParameter(
+            "index_of_the_particle", dtype="int32", direction=function.IN
+        )
         function.addParameter("rho", dtype="float64", direction=function.OUT)
         function.result_type = "int32"
         function.can_handle_array = True
@@ -52,10 +60,12 @@ class ArepoInterface(
     def new_dm_particle():
         function = LegacyFunctionSpecification()
         function.can_handle_array = True
-        function.addParameter('index_of_the_particle', dtype='int32', direction=function.OUT)
-        for x in ['mass','x','y','z','vx','vy','vz']:
-            function.addParameter(x, dtype='float64', direction=function.IN)
-        function.result_type = 'int32'
+        function.addParameter(
+            "index_of_the_particle", dtype="int32", direction=function.OUT
+        )
+        for x in ["mass", "x", "y", "z", "vx", "vy", "vz"]:
+            function.addParameter(x, dtype="float64", direction=function.IN)
+        function.result_type = "int32"
         return function
 
     def new_particle(self, mass, x, y, z, vx, vy, vz):
@@ -71,7 +81,6 @@ class ArepoInterface(
 
 
 class Arepo(GravitationalDynamics):
-
     def __init__(self, **options):
         GravitationalDynamics.__init__(self, ArepoInterface(**options), **options)
 
@@ -80,23 +89,45 @@ class Arepo(GravitationalDynamics):
 
         return result
 
-    def define_methods(self, builder):
+    def define_methods(self, handler):
+        GravitationalDynamics.define_methods(self, handler)
         # TODO: Determine how to link this to Arepo's run() - the main simulation loop.
-        builder.add_method(
-            "run_sim",
-            (),
-            (builder.ERROR_CODE)
-        )
+        handler.add_method("run_sim", (), (handler.ERROR_CODE))
         # When simulation is finished, shutdown HDF5 & MPI, and exit(0)
-        builder.add_method(
-            "cleanup_code",
-            (),
-            (builder.ERROR_CODE)
+        handler.add_method("cleanup_code", (), (handler.ERROR_CODE))
+        handler.add_method(
+            "new_dm_particle",
+            (
+                generic_unit_system.mass,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+            ),
+            (
+                handler.INDEX,
+                handler.ERROR_CODE,
+            ),
         )
+
+    def define_particle_sets(self, handler):
+        handler.define_set("particles", "index_of_the_particle")
+        handler.set_new("particles", "new_particle")
+        handler.set_delete("particles", "delete_particle")
+        handler.add_setter("particles", "set_state")
+        handler.add_getter("particles", "get_state")
+        handler.add_setter("particles", "set_mass")
+        handler.add_getter("particles", "get_mass", names=("mass",))
+        handler.add_setter("particles", "set_position")
+        handler.add_getter("particles", "get_position")
+        handler.add_setter("particles", "set_velocity")
+        handler.add_getter("particles", "get_velocity")
 
     def define_state(self, handler):
         GravitationalDynamics.define_state(self, handler)
-        
-        handler.add_method('EDIT', 'new_dm_particle')
-        handler.add_method('UPDATE', 'new_dm_particle')
-        handler.add_transition('RUN', 'UPDATE', 'new_dm_particle', False)
+
+        handler.add_method("EDIT", "new_dm_particle")
+        handler.add_method("UPDATE", "new_dm_particle")
+        handler.add_transition("RUN", "UPDATE", "new_dm_particle", False)

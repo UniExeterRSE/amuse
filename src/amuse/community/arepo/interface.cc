@@ -264,24 +264,13 @@ int initialize_code(){
 
   /* now we can load the file */
 
-#ifdef READ_DM_AS_GAS
-      read_ic(fname, (RestartFlag == 14) ? 0x02 : LOAD_TYPES);
-#else  /* #ifdef READ_DM_AS_GAS */
-      read_ic(fname, (RestartFlag == 14) ? 0x01 : LOAD_TYPES);
-#endif /* #ifdef READ_DM_AS_GAS #else */
+// #ifdef READ_DM_AS_GAS
+//       read_ic(fname, (RestartFlag == 14) ? 0x02 : LOAD_TYPES);
+// #else  /* #ifdef READ_DM_AS_GAS */
+//       read_ic(fname, (RestartFlag == 14) ? 0x01 : LOAD_TYPES);
+// #endif /* #ifdef READ_DM_AS_GAS #else */
 
-  /* init returns a status code, where a value of >=0 means that endrun() should be called. */
-  int status = init();
 
-  if(status >= 0)
-    {
-      if(status > 0)
-        printf("init() returned with %d\n", status);
-
-      cleanup_code();
-    }
-
-  begrun2();
 
   return 0;
 }
@@ -366,6 +355,7 @@ int commit_particles(){
   All.MaxPart = All.TreeAllocFactor * (All.TotNumPart / NTask); // TODO: Check TreeAllocFactor is right
   All.MaxPartSph = 0; // TODO:
 
+
   double a;
   if (All.ComovingIntegrationOn) {
     a = All.Time;
@@ -410,6 +400,19 @@ int commit_particles(){
       // P[i].GravCost = 1;
       // TODO: Potential?
   }
+
+  /* init returns a status code, where a value of >=0 means that endrun() should be called. */
+  int status = init();
+
+  if(status >= 0)
+    {
+      if(status > 0)
+        printf("init() returned with %d\n", status);
+
+      cleanup_code();
+    }
+
+  begrun2();
 
   return 0; // Here
 }
