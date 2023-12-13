@@ -485,7 +485,7 @@ class AbstractMessageChannel(OptionalAttributes):
     @classmethod
     def VALGRIND(cls, full_name_of_the_worker, channel, interpreter_executable=None, immediate_run=True):
         # arguments = ['-hold', '-display', os.environ['DISPLAY'], '-e', 'valgrind',  full_name_of_the_worker]
-        arguments = []
+        arguments = ["--leak-check=full", "--show-leak-kinds=all"]
         
         if not interpreter_executable is None:
             arguments.append(interpreter_executable)

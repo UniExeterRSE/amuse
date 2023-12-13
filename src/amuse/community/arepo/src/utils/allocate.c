@@ -102,6 +102,10 @@ void allocate_memory(void)
   /* set to zero */
   memset(P, 0, All.MaxPart * sizeof(struct particle_data));
   memset(SphP, 0, All.MaxPartSph * sizeof(struct sph_particle_data));
+  printf("AREPO:allocate.c:105 sizeof(struct particle_data): %d\n", sizeof(struct particle_data));
+  printf("AREPO:allocate.c:105 sizeof(struct sph_particle_data): %d\n", sizeof(struct sph_particle_data));
+  printf("AREPO:allocate.c:105 sizeof(P[0]): %d\n", sizeof(P[0]));
+  printf("AREPO:allocate.c:105 sizeof(TimeBinsGravity): %d\n", sizeof(TimeBinsGravity));
 }
 
 /*! \brief Reallocates memory for particle data.

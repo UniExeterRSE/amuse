@@ -366,6 +366,11 @@ int commit_particles(){
 
   NumPart = dm_states.size(); // TODO: sph_states.size()
   // NumGas = 0; // TODO:
+  printf("AREPO:interface.cc:369 sizeof(struct particle_data): %d\n", sizeof(struct particle_data));
+  printf("AREPO:interface.cc:369 sizeof(struct sph_particle_data): %d\n", sizeof(struct sph_particle_data));
+  printf("AREPO:interface.cc:369 sizeof(P[0]): %d\n", sizeof(P[0]));
+  printf("AREPO:interface.cc:369 sizeof(TimeBinsGravity): %d\n", sizeof(TimeBinsGravity));
+
   allocate_memory();
 
   // TODO: initialize sph particles
