@@ -109,8 +109,6 @@ void reconstruct_timebins(void)
 #endif
     }
 
-  int first_pass = 1;
-  printf("AREPO: P[4].Ti_Current: %d\n", P[4].Ti_Current);
   for(i = 0; i < NumPart; i++)
     {
       if(P[i].ID == 0 && P[i].Mass == 0)
@@ -122,12 +120,6 @@ void reconstruct_timebins(void)
         {
           TimeBinsGravity.PrevInTimeBin[i]                                  = TimeBinsGravity.LastInTimeBin[bin];
           TimeBinsGravity.NextInTimeBin[i]                                  = -1;
-          if (first_pass & P[4].Ti_Current) {
-            printf("AREPO:125: P[4].Ti_Current: %d\n", P[4].Ti_Current);
-            printf("           &P[4].Ti_Current: %p\n", (void *) &(P[4].Ti_Current));
-            printf("           &TimeBinsGravity.NextInTimeBin[i]: %p\n", (void *) &(TimeBinsGravity.NextInTimeBin[i]));
-
-          }
           TimeBinsGravity.NextInTimeBin[TimeBinsGravity.LastInTimeBin[bin]] = i;
           TimeBinsGravity.LastInTimeBin[bin]                                = i;
         }
@@ -137,20 +129,9 @@ void reconstruct_timebins(void)
           TimeBinsGravity.PrevInTimeBin[i] = TimeBinsGravity.NextInTimeBin[i] = -1;
         }
       TimeBinsGravity.TimeBinCount[bin]++;
-      if (first_pass  & P[4].Ti_Current ) {
-        first_pass = 0;
-        printf("AREPO: i: %d\n", i);
-        printf("AREPO:134: P[4].Ti_Current: %d\n", P[4].Ti_Current);
-      }
     }
 
-  printf("AREPO::137: P[4].Ti_Current: %d\n", P[4].Ti_Current);
   make_list_of_active_particles();
-  
-  printf("AREPO:predict.c:140: sizeof(struct particle_data): %d\n", sizeof(struct particle_data));
-  printf("AREPO:predict.c:140: sizeof(struct sph_particle_data): %d\n", sizeof(struct sph_particle_data));
-  printf("AREPO:predict.c:140: sizeof(P[0]): %d\n", sizeof(P[0]));
-  printf("AREPO:predict.c:140: sizeof(TimeBinsGravity): %d\n", sizeof(TimeBinsGravity));
 
   TIMER_STOP(CPU_TIMELINE);
 }

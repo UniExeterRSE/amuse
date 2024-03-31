@@ -36,9 +36,8 @@ HDF5_FLAGS += -DH5_USE_16_API
 
 MPICXX   ?= mpicxx
 CXX = $(MPICXX)
-CFLAGS   += -Wall -g -Wextra -pedantic
-CFLAGS += -ggdb3
-CXXFLAGS += $(CFLAGS) $(GSL_FLAGS) $(AREPOFLAGS) $(HDF5_FLAGS) -std=c++11
+CFLAGS   += -Wall -g
+CXXFLAGS += $(CFLAGS) $(GSL_FLAGS) $(AREPOFLAGS) $(HDF5_FLAGS)
 LDFLAGS  += -lm $(MUSE_LD_FLAGS)
 
 OBJS = interface.o

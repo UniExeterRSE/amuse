@@ -370,12 +370,6 @@ int commit_particles(){
   // TODO: Should be max of NumParts if working across multiple processors
   All.MaxPart    = NumPart / (1.0 - 2 * ALLOC_TOLERANCE);
   All.MaxPartSph = NumGas / (1.0 - 2 * ALLOC_TOLERANCE);
-
-  printf("AREPO:interface.cc:369 sizeof(struct particle_data): %d\n", sizeof(struct particle_data));
-  printf("AREPO:interface.cc:369 sizeof(struct sph_particle_data): %d\n", sizeof(struct sph_particle_data));
-  printf("AREPO:interface.cc:369 sizeof(P[0]): %d\n", sizeof(P[0]));
-  printf("AREPO:interface.cc:369 sizeof(TimeBinsGravity): %d\n", sizeof(TimeBinsGravity));
-
   allocate_memory();
 
   // TODO: initialize sph particles
