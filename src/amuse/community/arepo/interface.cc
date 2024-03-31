@@ -352,8 +352,8 @@ int commit_particles(){
   int i, j;
   All.TotNumPart = dm_particles_in_buffer; // TODO: Include sph_particles_in_buffer
   All.TotNumGas = 0; // TODO: sph_particles_in_buffer
-  All.MaxPart = All.TreeAllocFactor * (All.TotNumPart / NTask); // TODO: Check TreeAllocFactor is right
-  All.MaxPartSph = 0; // TODO:
+  // All.MaxPart = All.TreeAllocFactor * (All.TotNumPart / NTask); // TODO: Check TreeAllocFactor is right
+  // All.MaxPartSph = 0; // TODO:
 
 
   double a;
@@ -365,7 +365,12 @@ int commit_particles(){
   double a_inv = 1.0 / a;
 
   NumPart = dm_states.size(); // TODO: sph_states.size()
-  // NumGas = 0; // TODO:
+  NumGas = 0; // TODO:
+
+  // TODO: Should be max of NumParts if working across multiple processors
+  All.MaxPart    = NumPart / (1.0 - 2 * ALLOC_TOLERANCE);
+  All.MaxPartSph = NumGas / (1.0 - 2 * ALLOC_TOLERANCE);
+
   printf("AREPO:interface.cc:369 sizeof(struct particle_data): %d\n", sizeof(struct particle_data));
   printf("AREPO:interface.cc:369 sizeof(struct sph_particle_data): %d\n", sizeof(struct sph_particle_data));
   printf("AREPO:interface.cc:369 sizeof(P[0]): %d\n", sizeof(P[0]));
