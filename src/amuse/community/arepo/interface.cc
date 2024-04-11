@@ -357,6 +357,7 @@ int commit_particles(){
   // All.MaxPart = All.TreeAllocFactor * (All.TotNumPart / NTask); // TODO: Check TreeAllocFactor is right
   // All.MaxPartSph = 0; // TODO:
 
+  printf("Initialising %lli particles, of which %lli gas\n", All.TotNumPart, All.TotNumGas);
 
   double a;
   if (All.ComovingIntegrationOn) {
