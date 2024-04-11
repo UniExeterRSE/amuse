@@ -180,6 +180,23 @@ class Arepo(GravitationalDynamics):
                 handler.ERROR_CODE,
             ),
         )
+        handler.add_method(
+            "new_gas_particle",
+            (
+                generic_unit_system.mass,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+                generic_unit_system.specific_energy,
+            ),
+            (
+                handler.INDEX,
+                handler.ERROR_CODE,
+            )
+        )
 
     def define_particle_sets(self, handler):
         handler.define_super_set('particles', ['dm_particles','gas_particles'], 
