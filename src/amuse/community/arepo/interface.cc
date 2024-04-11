@@ -237,8 +237,13 @@ void set_noh_3d_parameters(){
 
 int initialize_code(){
 
-  MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
-  MPI_Comm_size(MPI_COMM_WORLD, &NTask);
+#ifndef NOMPI
+    MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
+    MPI_Comm_size(MPI_COMM_WORLD, &NTask);
+#else
+    ThisTask = 0;
+    NTask = 1;
+#endif
 
   /* output a welcome message */
   hello();

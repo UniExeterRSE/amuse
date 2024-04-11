@@ -79,6 +79,7 @@ p.u = Uthermal | nbody_system.speed**2
 # write_set_to_file(p, f'{simulation_directory}/IC.amuse')
 
 instance = Arepo(redirection="none")
+instance.initialize_code()
 instance.gas_particles.add_particles(p)
 # instance.parameters
 
