@@ -140,6 +140,80 @@ class ArepoInterface(
         function.result_type = 'int32'
         return function
 
+    @legacy_function
+    def set_box_size():
+        function = LegacyFunctionSpecification()
+        function.addParameter('value', dtype='d', direction=function.IN)
+        function.result_type = 'i'
+        return function
+        
+    @legacy_function
+    def get_box_size():
+        function = LegacyFunctionSpecification()
+        function.addParameter('value', dtype='d', direction=function.OUT)
+        function.result_type = 'i'
+        return function
+    
+    @legacy_function
+    def get_omega_zero():
+        function = LegacyFunctionSpecification()
+        function.addParameter('omega_zero', dtype='d', direction=function.OUT,
+            description = "Cosmological matter density parameter in units of the critical density at z=0.")
+        function.result_type = 'i'
+        return function
+    @legacy_function
+    def set_omega_zero():
+        function = LegacyFunctionSpecification()
+        function.addParameter('omega_zero', dtype='d', direction=function.IN,
+            description = "Cosmological matter density parameter in units of the critical density at z=0.")
+        function.result_type = 'i'
+        return function
+    
+    @legacy_function
+    def get_omega_lambda():
+        function = LegacyFunctionSpecification()
+        function.addParameter('omega_lambda', dtype='d', direction=function.OUT,
+            description = "Cosmological vacuum energy density parameter in units of the critical density at z=0.")
+        function.result_type = 'i'
+        return function
+    @legacy_function
+    def set_omega_lambda():
+        function = LegacyFunctionSpecification()
+        function.addParameter('omega_lambda', dtype='d', direction=function.IN,
+            description = "Cosmological vacuum energy density parameter in units of the critical density at z=0.")
+        function.result_type = 'i'
+        return function
+    
+    @legacy_function
+    def get_omega_baryon():
+        function = LegacyFunctionSpecification()
+        function.addParameter('omega_baryon', dtype='d', direction=function.OUT,
+            description = "Cosmological baryonic density parameter in units of the critical density at z=0.")
+        function.result_type = 'i'
+        return function
+    @legacy_function
+    def set_omega_baryon():
+        function = LegacyFunctionSpecification()
+        function.addParameter('omega_baryon', dtype='d', direction=function.IN,
+            description = "Cosmological baryonic density parameter in units of the critical density at z=0.")
+        function.result_type = 'i'
+        return function
+    
+    @legacy_function
+    def get_hubble_param():
+        function = LegacyFunctionSpecification()
+        function.addParameter('hubble_param', dtype='d', direction=function.OUT,
+            description = "The cosmological Hubble parameter.")
+        function.result_type = 'i'
+        return function
+    @legacy_function
+    def set_hubble_param():
+        function = LegacyFunctionSpecification()
+        function.addParameter('hubble_param', dtype='d', direction=function.IN,
+            description = "The cosmological Hubble parameter.")
+        function.result_type = 'i'
+        return function
+
     # This function has been kept as a basic template for future functions.
     # @legacy_function
     # def set_parameters():
@@ -150,8 +224,10 @@ class ArepoInterface(
 
 
 class Arepo(GravitationalDynamics):
-    def __init__(self, **options):
-        GravitationalDynamics.__init__(self, ArepoInterface(**options), **options)
+    def __init__(self, unit_converter=None, **options):
+        GravitationalDynamics.__init__(
+            self, ArepoInterface(**options), unit_converter, **options
+        )
 
     def initialize_code(self):
         result = self.overridden().initialize_code()
@@ -197,6 +273,53 @@ class Arepo(GravitationalDynamics):
                 handler.ERROR_CODE,
             )
         )
+        handler.add_method(
+            "get_state_gas",
+            (
+                handler.INDEX,
+            ),
+            (
+                generic_unit_system.mass,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+                generic_unit_system.specific_energy,
+                handler.ERROR_CODE
+            )
+        )
+        handler.add_method(
+            "set_state_gas",
+            (
+                handler.INDEX,
+                generic_unit_system.mass,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.length,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+                generic_unit_system.speed,
+                generic_unit_system.specific_energy,
+            ),
+            (
+                handler.ERROR_CODE,
+            )
+        )
+
+        handler.add_method(
+            "get_box_size",
+            (),
+            (generic_unit_system.length, handler.ERROR_CODE,)
+        )
+        
+        handler.add_method(
+            "set_box_size",
+            (generic_unit_system.length, ),
+            (handler.ERROR_CODE,)
+        )
+        
 
     def define_particle_sets(self, handler):
         handler.define_super_set('particles', ['dm_particles','gas_particles'], 
@@ -249,25 +372,55 @@ class Arepo(GravitationalDynamics):
             default_value=1.0 | generic_unit_system.time
         )
 
-        # handler.add_method_parameter(
-        #     "get_omega_lambda", 
-        #     "set_omega_lambda",
-        #     "omega_lambda", 
-        #     "Cosmological vacuum energy density parameter in units of the critical density at z=0.", 
-        #     default_value = 0.0
-        # )
-        # 
-        # handler.add_method_parameter(
-        #     "get_omega_baryon", 
-        #     "set_omega_baryon",
-        #     "omega_baryon", 
-        #     "Cosmological baryonic density parameter in units of the critical density at z=0.", 
-        #     default_value = 0.0
-        # )
+        handler.add_method_parameter(
+            "get_omega_zero", 
+            "set_omega_zero",
+            "omega_zero", 
+            "Cosmological matter density parameter in units of the critical density at z=0.", 
+            default_value = 0.0
+        )
+        
+        handler.add_method_parameter(
+            "get_omega_lambda", 
+            "set_omega_lambda",
+            "omega_lambda", 
+            "Cosmological vacuum energy density parameter in units of the critical density at z=0.", 
+            default_value = 0.0
+        )
+        
+        handler.add_method_parameter(
+            "get_omega_baryon", 
+            "set_omega_baryon",
+            "omega_baryon", 
+            "Cosmological baryonic density parameter in units of the critical density at z=0.", 
+            default_value = 0.0
+        )
+        
+        handler.add_method_parameter(
+            "get_hubble_param", 
+            "set_hubble_param",
+            "hubble_parameter", 
+            "The cosmological Hubble parameter, value of Hubble constant in units of 100 km/s / Mpc.", 
+            default_value = 0.7
+        )
+        handler.add_method_parameter(
+            "get_box_size", 
+            "set_box_size",
+            "periodic_box_size", 
+            "The size of the box in case of periodic boundary conditions.", 
+            default_value = 1.0 | generic_unit_system.length
+        )
 
     def define_state(self, handler):
         GravitationalDynamics.define_state(self, handler)
 
         handler.add_method("EDIT", "new_dm_particle")
+        handler.add_method("EDIT", "new_gas_particle")
         handler.add_method("UPDATE", "new_dm_particle")
+        handler.add_method("UPDATE", "new_gas_particle")
         handler.add_transition("RUN", "UPDATE", "new_dm_particle", False)
+        handler.add_transition("RUN", "UPDATE", "new_gas_particle", False)
+
+        handler.add_method('RUN', 'get_state_dm')
+        handler.add_method('RUN', 'get_state_gas')
+

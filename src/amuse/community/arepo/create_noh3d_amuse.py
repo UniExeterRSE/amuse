@@ -9,11 +9,13 @@ modified for AMUSE by Steven Rieder, 17 November 2023
 import sys    # system specific calls
 import numpy as np    # scientific computing package
 # import h5py    # hdf5 format
-from amuse.units import nbody_system
+from amuse.units import nbody_system, units
 from amuse.datamodel import Particles
 from amuse.io import write_set_to_file
 
 from amuse.community.arepo import Arepo
+
+np.random.seed(123)
 
 # simulation_directory = str(sys.argv[1])
 # print("examples/Noh_3d/create.py: creating ICs in directory " + simulation_directory)
@@ -79,7 +81,6 @@ p.u = Uthermal | nbody_system.speed**2
 # write_set_to_file(p, f'{simulation_directory}/IC.amuse')
 
 instance = Arepo(redirection="none")
-instance.initialize_code()
 instance.gas_particles.add_particles(p)
 # instance.parameters
 

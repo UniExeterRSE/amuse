@@ -581,7 +581,25 @@ int set_state_gas(int index_of_the_particle, double mass, double x, double y,
 int get_state_gas(int index_of_the_particle, double * mass, double * x,
   double * y, double * z, double * vx, double * vy, double * vz,
   double * u){
-  return -1;
+  int p_idx = find_particle_with_ID(index_of_the_particle);
+  if (p_idx < 0) {
+    printf("AREPO: Particle with ID %d not found in P", index_of_the_particle);
+    return p_idx;
+  }
+
+  if (P[p_idx].Type > 0){
+    printf("AREPO: Particle with index %d not gas", index_of_the_particle);
+    return -2;
+  }
+  *mass = P[p_idx].Mass;
+  *x = P[p_idx].Pos[0];
+  *y = P[p_idx].Pos[1];
+  *z = P[p_idx].Pos[2];
+  *vx = P[p_idx].Vel[0];
+  *vy = P[p_idx].Vel[1];
+  *vz = P[p_idx].Vel[2];
+  *u = SphP[p_idx].Utherm;
+  return 0;
 }
 
 int get_time_step(double * time_step){
@@ -753,4 +771,55 @@ int set_internal_energy(int index_of_the_particle, double u){
 
   SphP[p_idx].Utherm = u;
   return 0;
+}
+
+
+int get_box_size(double *value)
+{
+    if (ThisTask) {return 0;}
+    *value = All.BoxSize;
+    return 0;
+}
+
+int set_box_size(double value)
+{
+    All.BoxSize = value;
+    return 0;
+}
+
+int get_omega_zero(double *omega_zero){
+    if (ThisTask) {return 0;}
+    *omega_zero = All.Omega0;
+    return 0;
+}
+int set_omega_zero(double omega_zero){
+    All.Omega0 = omega_zero;
+    return 0;
+}
+int get_omega_lambda(double *omega_lambda){
+    if (ThisTask) {return 0;}
+    *omega_lambda = All.OmegaLambda;
+    return 0;
+}
+int set_omega_lambda(double omega_lambda){
+    All.OmegaLambda = omega_lambda;
+    return 0;
+}
+int get_omega_baryon(double *omega_baryon){
+    if (ThisTask) {return 0;}
+    *omega_baryon = All.OmegaBaryon;
+    return 0;
+}
+int set_omega_baryon(double omega_baryon){
+    All.OmegaBaryon = omega_baryon;
+    return 0;
+}
+int get_hubble_param(double *hubble_param){
+    if (ThisTask) {return 0;}
+    *hubble_param = All.HubbleParam;
+    return 0;
+}
+int set_hubble_param(double hubble_param){
+    All.HubbleParam = hubble_param;
+    return 0;
 }
