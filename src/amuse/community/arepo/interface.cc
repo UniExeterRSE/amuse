@@ -320,7 +320,7 @@ static int find_particle_with_ID(int particle_id) {
 
     if (it == ID_RLOOKUP.end()) {
       // particle_id wasn't in the map - rebuild ID_RLOOKUP and try again
-      cout << "AMUSE: Rebuilding particle_ID lookup (ID not found).\n";
+      printf("AMUSE: Rebuilding particle_ID lookup (ID not found).\n");
       create_ID_reverse_lookup();
       continue;
     }
@@ -329,7 +329,7 @@ static int find_particle_with_ID(int particle_id) {
 
     if (P[particle_pos].ID != particle_id) {
       // particle_id had the wrong value - rebuild ID_RLOOKUP and try again
-      cout << "AMUSE: Rebuilding particle ID lookup table (ID index changed).\n";
+      printf("AMUSE: Rebuilding particle ID lookup table (ID index changed).\n");
       create_ID_reverse_lookup();
       continue;
     }
@@ -563,8 +563,19 @@ int set_state(int index_of_the_particle, double mass, double x, double y,
 int get_state(int index_of_the_particle, double * mass, double * x,
   double * y, double * z, double * vx, double * vy, double * vz,
   double * radius){
-    // Arepo has delaunay cell radii.
+    // Arepo has Delaunay cell radii.
   return 0;
+}
+
+int set_state_gas(int index_of_the_particle, double mass, double x, double y,
+  double z, double vx, double vy, double vz, double u){
+  return -1;
+}
+
+int get_state_gas(int index_of_the_particle, double * mass, double * x,
+  double * y, double * z, double * vx, double * vy, double * vz,
+  double * u){
+  return -1;
 }
 
 int get_time_step(double * time_step){
@@ -703,5 +714,37 @@ int get_density(int index_of_the_particle, double * rho){
   }
 
   *rho = SphP[p_idx].Density;
+  return 0;
+}
+
+int get_internal_energy(int index_of_the_particle, double * u){
+  int p_idx = find_particle_with_ID(index_of_the_particle);
+  if (p_idx < 0) {
+    printf("AREPO: Particle with ID %d not found in P", index_of_the_particle);
+    return p_idx;
+  }
+
+  if (P[p_idx].Type > 0){
+    printf("AREPO: Particle with index %d not gas", index_of_the_particle);
+    return -2;
+  }
+
+  *u = SphP[p_idx].Utherm;
+  return 0;
+}
+
+int set_internal_energy(int index_of_the_particle, double u){
+  int p_idx = find_particle_with_ID(index_of_the_particle);
+  if (p_idx < 0) {
+    printf("AREPO: Particle with ID %d not found in P", index_of_the_particle);
+    return p_idx;
+  }
+
+  if (P[p_idx].Type > 0){
+    printf("AREPO: Particle with index %d not gas", index_of_the_particle);
+    return -2;
+  }
+
+  SphP[p_idx].Utherm = u;
   return 0;
 }

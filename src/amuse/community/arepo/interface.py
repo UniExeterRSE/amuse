@@ -57,6 +57,27 @@ class ArepoInterface(
         return function
 
     @legacy_function
+    def get_internal_energy():
+        function = LegacyFunctionSpecification()
+        function.addParameter(
+            "index_of_the_particle", dtype="int32", direction=function.IN
+        )
+        function.addParameter("u", dtype="float64", direction=function.OUT)
+        function.result_type = "int32"
+        function.can_handle_array = True
+        return function
+    
+    @legacy_function
+    def set_internal_energy():
+        function = LegacyFunctionSpecification()
+        function.addParameter(
+            "index_of_the_particle", dtype="int32", direction=function.IN)
+        function.addParameter("u", dtype="float64", direction=function.IN)
+        function.result_type = "int32"
+        function.can_handle_array = True        
+        return function
+
+    @legacy_function
     def new_dm_particle():
         function = LegacyFunctionSpecification()
         function.can_handle_array = True
@@ -68,8 +89,56 @@ class ArepoInterface(
         function.result_type = "int32"
         return function
 
+    @legacy_function
+    def new_gas_particle():
+        function = LegacyFunctionSpecification()
+        function.can_handle_array = True
+        function.addParameter(
+            "index_of_the_particle", dtype="int32", direction=function.OUT
+        )
+        for x in ["mass", "x", "y", "z", "vx", "vy", "vz", "u"]:
+            function.addParameter(x, dtype="float64", direction=function.IN)
+        function.result_type = "int32"
+        return function
+
     def new_particle(self, mass, x, y, z, vx, vy, vz):
         return self.new_dm_particle(mass, x, y, z, vx, vy, vz)
+
+    @legacy_function
+    def get_state_gas():
+        function = LegacyFunctionSpecification()
+        function.can_handle_array = True
+        function.addParameter(
+            'index_of_the_particle', dtype='int32', direction=function.IN,
+            description=(
+                "Index of the particle to get the state from. "
+                "This index must have been returned by an earlier call to "
+                ":meth:`new_particle`"
+            )
+        )
+        for x in ['mass','x','y','z','vx','vy','vz','u']:
+            function.addParameter(x, dtype='float64', direction=function.OUT)
+        # function.addParameter('length', 'int32', function.LENGTH)
+        function.result_type = 'int32'
+        return function
+
+    @legacy_function
+    def set_state_gas():
+        function = LegacyFunctionSpecification()
+        function.can_handle_array = True
+        function.addParameter(
+            'index_of_the_particle', dtype='int32', direction=function.IN,
+            description=(
+                "Index of the particle for which the state is to be updated. "
+                "This index must have been returned by an earlier call to "
+                ":meth:`new_particle`"
+            )
+        )
+        for x in ['mass','x','y','z','vx','vy','vz','u']:
+            function.addParameter(x, dtype='float64', direction=function.IN)
+        # function.addParameter('length', 'int32', function.LENGTH)
+        function.result_type = 'int32'
+        return function
 
     # This function has been kept as a basic template for future functions.
     # @legacy_function
@@ -113,17 +182,71 @@ class Arepo(GravitationalDynamics):
         )
 
     def define_particle_sets(self, handler):
-        handler.define_set("particles", "index_of_the_particle")
-        handler.set_new("particles", "new_particle")
-        handler.set_delete("particles", "delete_particle")
-        handler.add_setter("particles", "set_state")
-        handler.add_getter("particles", "get_state")
-        handler.add_setter("particles", "set_mass")
-        handler.add_getter("particles", "get_mass", names=("mass",))
-        handler.add_setter("particles", "set_position")
-        handler.add_getter("particles", "get_position")
-        handler.add_setter("particles", "set_velocity")
-        handler.add_getter("particles", "get_velocity")
+        handler.define_super_set('particles', ['dm_particles','gas_particles'], 
+            index_to_default_set = 0)
+        handler.define_set('dm_particles', 'index_of_the_particle')
+        handler.set_new('dm_particles', 'new_dm_particle')
+        handler.set_delete('dm_particles', 'delete_particle')
+        handler.add_setter('dm_particles', 'set_state')
+        handler.add_getter('dm_particles', 'get_state')
+        handler.add_setter('dm_particles', 'set_mass')
+        handler.add_getter('dm_particles', 'get_mass', names=('mass',))
+        handler.add_setter('dm_particles', 'set_position')
+        handler.add_getter('dm_particles', 'get_position')
+        handler.add_setter('dm_particles', 'set_velocity')
+        handler.add_getter('dm_particles', 'get_velocity')
+        # handler.add_getter('dm_particles', 'get_acceleration')
+        # handler.add_getter('dm_particles', 'get_epsilon_dm_part', names = ('radius',))
+        # handler.add_getter('dm_particles', 'get_epsilon_dm_part', names = ('epsilon',))
+
+        handler.define_set('gas_particles', 'index_of_the_particle')
+        handler.set_new('gas_particles', 'new_gas_particle')
+        handler.set_delete('gas_particles', 'delete_particle')
+        handler.add_setter('gas_particles', 'set_state_gas')
+        handler.add_getter('gas_particles', 'get_state_gas')
+        handler.add_setter('gas_particles', 'set_mass')
+        handler.add_getter('gas_particles', 'get_mass', names=('mass',))
+        handler.add_setter('gas_particles', 'set_position')
+        handler.add_getter('gas_particles', 'get_position')
+        handler.add_setter('gas_particles', 'set_velocity')
+        handler.add_getter('gas_particles', 'get_velocity')
+        # handler.add_getter('gas_particles', 'get_acceleration')
+        handler.add_setter('gas_particles', 'set_internal_energy')
+        handler.add_getter('gas_particles', 'get_internal_energy')
+        # handler.add_getter('gas_particles', 'get_smoothing_length')
+        # handler.add_getter('gas_particles', 'get_density', names=('rho',))
+        # handler.add_getter('gas_particles', 'get_density', names=('density',))
+        # handler.add_getter('gas_particles', 'get_pressure')
+        # handler.add_getter('gas_particles', 'get_d_internal_energy_dt')
+        # handler.add_getter('gas_particles', 'get_n_neighbours')
+        # handler.add_getter('gas_particles', 'get_epsilon_gas_part', names = ('radius',))
+        # handler.add_getter('gas_particles', 'get_epsilon_gas_part', names = ('epsilon',))
+
+
+    def define_parameters(self, handler):
+        handler.add_method_parameter(
+            "get_time_step", 
+            None,
+            "timestep", 
+            "timestep for the system.", 
+            default_value=1.0 | generic_unit_system.time
+        )
+
+        # handler.add_method_parameter(
+        #     "get_omega_lambda", 
+        #     "set_omega_lambda",
+        #     "omega_lambda", 
+        #     "Cosmological vacuum energy density parameter in units of the critical density at z=0.", 
+        #     default_value = 0.0
+        # )
+        # 
+        # handler.add_method_parameter(
+        #     "get_omega_baryon", 
+        #     "set_omega_baryon",
+        #     "omega_baryon", 
+        #     "Cosmological baryonic density parameter in units of the critical density at z=0.", 
+        #     default_value = 0.0
+        # )
 
     def define_state(self, handler):
         GravitationalDynamics.define_state(self, handler)
