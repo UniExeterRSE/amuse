@@ -13,6 +13,8 @@ from amuse.units import nbody_system
 from amuse.datamodel import Particles
 from amuse.io import write_set_to_file
 
+from amuse.community.arepo import Arepo
+
 simulation_directory = str(sys.argv[1])
 print("examples/Noh_3d/create.py: creating ICs in directory " + simulation_directory)
 
@@ -75,3 +77,6 @@ p.mass = Mass | nbody_system.mass
 p.u = Uthermal | nbody_system.speed**2
 
 write_set_to_file(p, f'{simulation_directory}/IC.amuse')
+
+instance = Arepo(redirection="none")
+#instance.parameters

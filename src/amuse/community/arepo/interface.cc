@@ -21,8 +21,10 @@ map<MyIDType, size_t> ID_RLOOKUP;
 static void create_ID_reverse_lookup();
 
 long long dm_particles_in_buffer = 0;
-long long particle_id_counter = 0;
+long long gas_particles_in_buffer = 0;
+long long particle_id_counter = 0;  // dm and sph use same counter
 map<long long, dynamics_state> dm_states;
+map<long long, gas_state> gas_states;
 
 void set_default_parameters(){
   // Relevant files
@@ -350,8 +352,8 @@ int commit_particles(){
   // Refer to gadget2 interface.cc, also read_ic.c
   double t0, t1;
   int i, j;
-  All.TotNumPart = dm_particles_in_buffer; // TODO: Include sph_particles_in_buffer
-  All.TotNumGas = 0; // TODO: sph_particles_in_buffer
+  All.TotNumPart = gas_particles_in_buffer + dm_particles_in_buffer;
+  All.TotNumGas = gas_particles_in_buffer;
   // All.MaxPart = All.TreeAllocFactor * (All.TotNumPart / NTask); // TODO: Check TreeAllocFactor is right
   // All.MaxPartSph = 0; // TODO:
 
@@ -364,19 +366,39 @@ int commit_particles(){
   }
   double a_inv = 1.0 / a;
 
-  NumPart = dm_states.size(); // TODO: sph_states.size()
-  NumGas = 0; // TODO:
+  NumPart = dm_states.size() + gas_states.size();
+  NumGas = gas_states.size();
 
   // TODO: Should be max of NumParts if working across multiple processors
   All.MaxPart    = NumPart / (1.0 - 2 * ALLOC_TOLERANCE);
   All.MaxPartSph = NumGas / (1.0 - 2 * ALLOC_TOLERANCE);
   allocate_memory();
+  dump_memory_table();
 
-  // TODO: initialize sph particles
+  // Initialize gas particles; From gadget2 interface.cc
   i = 0;
+  for (map<long long, gas_state>::iterator state_iter = gas_states.begin();
+          state_iter != gas_states.end(); state_iter++, i++){
+      P[i].ID = (*state_iter).first;
+      P[i].Mass = (*state_iter).second.mass;
+      P[i].Pos[0] = (*state_iter).second.x * a_inv;
+      P[i].Pos[1] = (*state_iter).second.y * a_inv;
+      P[i].Pos[2] = (*state_iter).second.z * a_inv;
+      P[i].Vel[0] = (*state_iter).second.vx * a;
+      P[i].Vel[1] = (*state_iter).second.vy * a;
+      P[i].Vel[2] = (*state_iter).second.vz * a;
+      P[i].Type = 0; // SPH particles (dark matter particles have type 1)
+      SphP[i].Utherm = (*state_iter).second.u;
+      SphP[i].Density = -1;
+      SphP[i].Hsml = 0;
+#ifdef MORRIS97VISC
+      SphP[i].Alpha = (*state_iter).second.alpha;
+      SphP[i].DAlphaDt = (*state_iter).second.dalphadt;
+#endif
+  }
+  gas_states.clear();
 
   // initialize dark matter particles
-  i = 0; // TODO: NumGas
   for (map<long long, dynamics_state>::iterator state_iter = dm_states.begin();
           state_iter != dm_states.end(); state_iter++, i++){
       P[i].ID = (*state_iter).first;
@@ -459,6 +481,30 @@ int new_dm_particle(int * index_of_the_particle, double mass, double x,
       dm_states.insert(std::pair<long long, dynamics_state>(particle_id_counter, state));
   }
   dm_particles_in_buffer++;
+  return 0;
+
+}
+
+int new_gas_particle(int * index_of_the_particle, double mass, double x,
+  double y, double z, double vx, double vy, double vz, double u){
+  particle_id_counter++;
+  if (ThisTask == 0)
+      *index_of_the_particle = particle_id_counter; // id undefined?
+
+  // Divide the particles equally over all Tasks, arepo will redistribute them later.
+  if (ThisTask == (gas_particles_in_buffer % NTask)){
+      gas_state state;  // TODO: Check these properties match up
+      state.mass = mass;
+      state.x = x;
+      state.y = y;
+      state.z = z;
+      state.vx = vx;
+      state.vy = vy;
+      state.vz = vz;
+      state.u = u;
+      gas_states.insert(std::pair<long long, gas_state>(particle_id_counter, state));
+  }
+  gas_particles_in_buffer++;  // TODO: initialised?
   return 0;
 
 }
