@@ -15,11 +15,11 @@ from amuse.io import write_set_to_file
 
 from amuse.community.arepo import Arepo
 
-simulation_directory = str(sys.argv[1])
-print("examples/Noh_3d/create.py: creating ICs in directory " + simulation_directory)
+# simulation_directory = str(sys.argv[1])
+# print("examples/Noh_3d/create.py: creating ICs in directory " + simulation_directory)
 
 """ initial condition parameters """
-FilePath = f"{simulation_directory}/IC.amuse"
+# FilePath = f"{simulation_directory}/IC.amuse"
 
 FloatType = np.float64  # double precision: np.float64, for single use np.float32
 IntType = np.int32
@@ -76,7 +76,49 @@ p.velocity = Velocity[:,:] | nbody_system.speed
 p.mass = Mass | nbody_system.mass
 p.u = Uthermal | nbody_system.speed**2
 
-write_set_to_file(p, f'{simulation_directory}/IC.amuse')
+# write_set_to_file(p, f'{simulation_directory}/IC.amuse')
 
 instance = Arepo(redirection="none")
-#instance.parameters
+instance.gas_particles.add_particles(p)
+# instance.parameters
+
+print(len(p))
+print(len(instance.gas_particles))
+print(instance.gas_particles)
+
+# TODO: get working
+instance.commit_particles()
+
+
+
+# print(instance.parameters)
+
+# Modified from arepo/examples/noh3d/create.py
+NumPart = np.array([NumberOfCells, 0, 0, 0, 0, 0], dtype=IntType)
+params_to_set = {
+    "NumPart_ThisFile": NumPart,
+    "NumPart_Total": NumPart,
+    "NumPart_Total_HighWord": np.zeros(6, dtype=IntType),
+    "MassTable": np.zeros(6, dtype=IntType),
+    "Time": 0.0,
+    "Redshift": 0.0,
+    "BoxSize": Boxsize,
+    "NumFilesPerSnapshot": 1,
+    "Omega0": 0.0,
+    "OmegaB": 0.0,
+    "OmegaLambda": 0.0,
+    "HubbleParam": 1.0,
+    "Flag_Sfr": 0,
+    "Flag_Cooling": 0,
+    "Flag_StellarAge": 0,
+    "Flag_Metals": 0,
+    "Flag_Feedback": 0,
+}
+if Pos.dtype == np.float64:
+    params_to_set["Flag_DoublePrecision"] = 1
+else:
+    params_to_set["Flag_DoublePrecision"] = 0
+
+for k, v in params_to_set.items():
+    pass  # instance.paramaters.__setattr__(k, v)
+
