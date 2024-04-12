@@ -602,6 +602,18 @@ int get_state_gas(int index_of_the_particle, double * mass, double * x,
   return 0;
 }
 
+int get_minimum_time_step(double * minimum_time_step){
+  if (ThisTask) {return 0;}
+  *minimum_time_step = All.MinSizeTimestep;
+  return 0;
+}
+
+int set_minimum_time_step(double minimum_time_step){
+  if (ThisTask) {return 0;}
+  All.MinSizeTimestep = minimum_time_step;
+  return 0;
+}
+
 int get_time_step(double * time_step){
   if (ThisTask) {return 0;}
   *time_step = All.TimeStep;
@@ -617,6 +629,12 @@ int get_kinetic_energy(double * kinetic_energy){
 }
 
 int get_number_of_particles(int * number_of_particles){
+  if (ThisTask) {return 0;}
+  *number_of_particles = NumPart;
+  return 0;
+}
+
+int get_number_of_gas_particles(int * number_of_particles){
   if (ThisTask) {return 0;}
   *number_of_particles = All.TotNumPart;
   return 0;

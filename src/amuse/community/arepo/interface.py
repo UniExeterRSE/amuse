@@ -35,6 +35,32 @@ class ArepoInterface(
         # TODO: Determine whether need to inherit from CodeWithDataDirectories.
 
     @legacy_function
+    def get_minimum_time_step():
+        """
+        Retrieve the model timestep.
+        """
+        function = LegacyFunctionSpecification()
+        function.addParameter(
+            'minimum_time_step', dtype='float64', direction=function.OUT,
+            description="The minimum timestep"
+        )
+        function.result_type = 'int32'
+        return function
+
+    @legacy_function
+    def set_minimum_time_step():
+        """
+        Retrieve the model timestep.
+        """
+        function = LegacyFunctionSpecification()
+        function.addParameter(
+            'minimum_time_step', dtype='float64', direction=function.IN,
+            description="The minimum timestep"
+        )
+        function.result_type = 'int32'
+        return function
+
+    @legacy_function
     def get_pressure():
         function = LegacyFunctionSpecification()
         function.addParameter(
@@ -319,6 +345,18 @@ class Arepo(GravitationalDynamics):
             (generic_unit_system.length, ),
             (handler.ERROR_CODE,)
         )
+
+        handler.add_method(
+            "get_minimum_time_step",
+            (),
+            (generic_unit_system.time, handler.ERROR_CODE,)
+        )
+
+        handler.add_method(
+            "set_minimum_time_step",
+            (generic_unit_system.time),
+            (handler.ERROR_CODE,)
+        )
         
 
     def define_particle_sets(self, handler):
@@ -370,6 +408,14 @@ class Arepo(GravitationalDynamics):
             "timestep", 
             "timestep for the system.", 
             default_value=1.0 | generic_unit_system.time
+        )
+
+        handler.add_method_parameter(
+            "get_minimum_time_step", 
+            "set_minimum_time_step",
+            "minimum_timestep", 
+            "minimum timestep for the system.", 
+            default_value=1.0e-5 | generic_unit_system.time
         )
 
         handler.add_method_parameter(
