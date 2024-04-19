@@ -676,26 +676,26 @@ int get_potential_energy(double * potential_energy){
 
 int get_velocity(int index_of_the_particle, double * vx, double * vy,
   double * vz){
-  int p = find_particle_with_ID(index_of_the_particle);
-  if (p >= 0) {
+    int p = find_particle_with_ID(index_of_the_particle);
+    if (p < 0) {
+      return p;
+    }
     *vx = P[p].Vel[0];
     *vy = P[p].Vel[1];
     *vz = P[p].Vel[2];
     return 0;
-  }
-  return -3;
 }
 
 int get_position(int index_of_the_particle, double * x, double * y,
   double * z){
     int p = find_particle_with_ID(index_of_the_particle);
-    if (p >= 0) {
-      *x = P[p].Pos[0];
-      *y = P[p].Pos[1];
-      *z = P[p].Pos[2];
-      return 0;
+    if (p < 0) {
+      return p;
     }
-    return -3;
+    *x = P[p].Pos[0];
+    *y = P[p].Pos[1];
+    *z = P[p].Pos[2];
+    return 0;
 }
 
 int set_position(int index_of_the_particle, double x, double y, double z){
