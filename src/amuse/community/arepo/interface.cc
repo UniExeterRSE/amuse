@@ -841,3 +841,13 @@ int set_hubble_param(double hubble_param){
     All.HubbleParam = hubble_param;
     return 0;
 }
+
+int call_refinement(){
+  #ifdef REFINEMENT
+    // Function declaration conditional on flags REFINEMENT_SPLIT_CELLS or REFINEMENT_MERGE_CELLS
+    do_derefinements_and_refinements();
+    return 0;
+  #else
+    return -1;
+  #endif // ifdef REFINEMENT
+}
