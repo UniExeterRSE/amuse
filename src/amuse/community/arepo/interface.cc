@@ -235,6 +235,121 @@ void set_noh_3d_parameters(){
 
 }
 
+void set_merger_galaxy_parameters(){
+  // Adapted from arepo/examples/galaxy_merger_star_formation_3d/param.txt
+
+  //----- Memory alloction
+  All.MaxMemSize                            = 2500;
+
+  //---- Caracteristics of run
+  All.TimeBegin                             = 0.0;
+  All.TimeMax                               = 3.0; // End of the simulation
+
+  //---- Basic code options that set the type of simulation
+  All.ComovingIntegrationOn                 = 0;
+  All.PeriodicBoundariesOn                  = 0;
+  All.CoolingOn                             = 1;
+  All.StarformationOn                       = 1;
+
+  //---- Cosmological parameters (Planck cosmology)
+  All.Omega0                                = 0.0;
+  All.OmegaLambda                           = 0.0;
+  All.OmegaBaryon                           = 0.0;    //0.0486
+  All.HubbleParam                           = 0.6774;
+  All.BoxSize                               = 649.201;
+
+  /*
+  //---- Output frequency and output parameters
+  All.OutputListOn                            1
+  All.TimeBetSnapshot                         0.0
+  All.TimeOfFirstSnapshot                     0.0
+  All.TimeBetStatistics                       0.0234375
+  All.NumFilesPerSnapshot                     1
+  All.NumFilesWrittenInParallel               1
+  */
+
+  //---- Accuracy of time integration
+  All.TypeOfTimestepCriterion               = 0;
+  All.ErrTolIntAccuracy                     = 0.012;
+  All.CourantFac                            = 0.3;
+  All.MaxSizeTimestep                       = 0.0234375;
+  All.MinSizeTimestep                       = 2.0e-8;
+
+
+  //---- Treatment of empty space and temperature limits
+  All.InitGasTemp                           = 244.8095;
+  All.MinGasTemp                            = 5.0;
+  All.MinimumDensityOnStartUp               = 1.0e-10;  // very important for this setup!
+  All.LimitUBelowThisDensity                = 0.0;
+  All.LimitUBelowCertainDensityToThisValue  = 0.0;
+  All.MinEgySpec                            = 0.0;
+
+  //---- Tree algorithm, force accuracy, domain update frequency
+  All.TypeOfOpeningCriterion                = 1;
+  All.ErrTolTheta                           = 0.7;
+  All.ErrTolForceAcc                        = 0.0025;
+  All.MultipleDomains                       = 8;
+  All.TopNodeFactor                         = 2.5;
+  All.ActivePartFracForNewDomainDecomp      = 0.01;
+
+  //---- Initial density estimate
+  All.DesNumNgb                             = 64;
+  All.MaxNumNgbDeviation                    = 4;
+
+  //---- System of units
+  All.UnitLength_in_cm                      = 3.085678e21;   //  1.0 kpc
+  All.UnitMass_in_g                         = 1.989e43;      //  1.0e10 solar masses
+  All.UnitVelocity_in_cm_per_s              = 1e5;           //  1 km/sec
+  All.GravityConstantInternal               = 0;
+
+  //---- Gravitational softening lengths
+  // AREPO: Special format from params.txt
+  All.SofteningComoving[0]                = 2.0;
+  All.SofteningComoving[1]                = 2.0;
+
+  // AREPO: Special format from params.txt
+  All.SofteningMaxPhys[0]                 = 2.0;
+  All.SofteningMaxPhys[1]                 = 2.0;
+
+  All.GasSoftFactor                         = 2.5;
+
+  // AMUSE: Special treatment
+  All.SofteningTypeOfPartType[0]              = 0;
+  All.SofteningTypeOfPartType[1]              = 1;
+  All.SofteningTypeOfPartType[2]              = 1;
+  All.SofteningTypeOfPartType[3]              = 1;
+  All.SofteningTypeOfPartType[4]              = 1;
+  All.SofteningTypeOfPartType[5]              = 1;
+
+
+  All.MinimumComovingHydroSoftening         = 1.0;
+  All.AdaptiveHydroSofteningSpacing         = 1.2;
+
+  //----- Mesh regularization options
+  All.CellShapingSpeed                      = 0.5;
+  All.CellMaxAngleFactor                    = 2.25;
+  All.ReferenceGasPartMass                  = 9.76211e-05;
+  All.TargetGasMassFactor                   = 1;
+  All.RefinementCriterion                   = 1;
+  All.DerefinementCriterion                 = 1;
+  All.MeanVolume                            = 66800.2;
+  All.MaxVolumeDiff                         = 10;      // avoid strong resolution gradients
+  All.MinVolume                             = 1;
+  All.MaxVolume                             = 1.0e9;   // no limits
+
+  //---- Parameters for star formation model
+  All.CritPhysDensity                       = 0;       // critical physical density for star formation (in cm^(-3))
+  All.MaxSfrTimescale                       = 2.27;    // in internal time units
+  All.CritOverDensity                       = 57.7;    // overdensity threshold value
+  All.TempSupernova                         = 5.73e7;  // in Kelvin
+  All.TempClouds                            = 1000.0;  // in Kelvin
+  All.FactorEVP                             = 573.0;
+  All.TemperatureThresh                     = 1e+06;
+  All.FactorSN                              = 0.1;
+
+  strcpy(All.TreecoolFile, "./TREECOOL_ep");
+}
+
 int initialize_code(){
 
 #ifndef NOMPI
@@ -256,7 +371,8 @@ int initialize_code(){
   mpi_report_committable_memory();
 
   // set_default_parameters();
-  set_noh_3d_parameters();
+  // set_noh_3d_parameters();
+  set_merger_galaxy_parameters();
 
 
   RestartFlag = 0;
