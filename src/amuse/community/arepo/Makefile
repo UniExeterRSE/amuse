@@ -16,7 +16,7 @@ CFLAGS   += -Wall -g
 CXXFLAGS += $(CFLAGS) $(GSL_FLAGS) $(AREPOFLAGS) $(HDF5_FLAGS)
 LDFLAGS  += -lm $(MUSE_LD_FLAGS)
 
-OBJS = interface.o
+OBJS = interface.o query_struct.o
 
 CODELIB = src/libarepo.a
 
