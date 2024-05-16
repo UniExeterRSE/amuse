@@ -20,6 +20,9 @@ typedef struct {
     double u;                                           /// entropy
 } gas_state;
 
+// query_struct.h
+void query_density(const int npoints, const double x[], const double y[], const double z[], double density[]);
+
 #ifdef ___cplusplus
 }
 #define __cplusplus
