@@ -716,6 +716,10 @@ extern gsl_rng *random_generator_aux; /*!< an auxialiary random number generator
 extern int Stars_converted; /*!< current number of star particles in gas particle block */
 #endif                      /* #ifdef USE_SFR */
 
+#if defined(REFINEMENT_MERGE_CELLS) && defined(REFINEMENT_SPLIT_CELLS)
+extern char *FlagDoNotRefine; /*! flag if file should not be refined */
+#endif /* #if defined (REFINEMENT_MERGE_CELLS) && defined (REFINEMENT_SPLIT_CELLS) */
+
 #ifdef TOLERATE_WRITE_ERROR
 extern int WriteErrorFlag;
 extern char AlternativeOutputDir[MAXLEN_PATH];
