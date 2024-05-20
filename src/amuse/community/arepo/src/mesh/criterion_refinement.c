@@ -53,10 +53,6 @@ static int jeans_refinement_criteria(int i);
 static int refine_criterion_volume(int i);
 #endif
 
-#ifdef REFINEMENT_MERGE_CELLS
-char *FlagDoNotRefine;
-#endif /* #ifdef REFINEMENT_MERGE_CELLS */
-
 /*! \brief Should this cell be refined?
  *
  *  This function signals whether a cell needs further refinement. This needs

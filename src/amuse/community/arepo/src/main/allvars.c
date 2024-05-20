@@ -109,11 +109,6 @@ struct TimeBinData TimeBinsHydro, TimeBinsGravity;
 double TimeBinSfr[TIMEBINS];
 #endif
 
-#ifdef SUBFIND
-int GrNr;
-int NumPartGroup;
-#endif /* #ifdef SUBFIND */
-
 char DumpFlag         = 1;
 char DumpFlagNextSnap = 1;
 
