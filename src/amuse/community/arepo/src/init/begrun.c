@@ -101,13 +101,7 @@ void begrun0(void)
  */
 void begrun1(void)
 {
-  /* read_parameter_file(ParameterFile);  ... read in parameters for this run */
-
-#ifdef HOST_MEMORY_REPORTING
-  check_maxmemsize_setting();
-#endif /* #ifdef HOST_MEMORY_REPORTING */
-
-  mymalloc_init(); /* Added from read_parameter_file */
+  read_parameter_file(ParameterFile); /* ... read in parameters for this run */
 
   check_parameters(); /* consistency check of parameters */
 
