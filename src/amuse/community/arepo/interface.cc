@@ -159,6 +159,8 @@ int initialize_code(){
 
   RestartFlag = 0;
 
+  strcpy(ParameterFile, "./params.txt");
+
   // May not need to do this (we want AMUSE to manage this)
   // MPI_Bcast(&All, sizeof(struct global_data_all_processes), MPI_BYTE, 0, MPI_COMM_WORLD);
   begrun1(); /* set-up run  */
@@ -169,11 +171,11 @@ int initialize_code(){
 
   /* now we can load the file */
 
-// #ifdef READ_DM_AS_GAS
-//       read_ic(fname, (RestartFlag == 14) ? 0x02 : LOAD_TYPES);
-// #else  /* #ifdef READ_DM_AS_GAS */
-//       read_ic(fname, (RestartFlag == 14) ? 0x01 : LOAD_TYPES);
-// #endif /* #ifdef READ_DM_AS_GAS #else */
+#ifdef READ_DM_AS_GAS
+      read_ic(fname, (RestartFlag == 14) ? 0x02 : LOAD_TYPES);
+#else  /* #ifdef READ_DM_AS_GAS */
+      read_ic(fname, (RestartFlag == 14) ? 0x01 : LOAD_TYPES);
+#endif /* #ifdef READ_DM_AS_GAS #else */
 
 
 
