@@ -454,7 +454,8 @@ class Arepo(GravitationalDynamics):
             "set_box_size",
             "periodic_box_size", 
             "The size of the box in case of periodic boundary conditions.", 
-            default_value = 1.0 | generic_unit_system.length
+            default_value = 6.0 | generic_unit_system.length
+            # TODO: Explore why this is overwriting the value set in params.txt
         )
 
     def define_state(self, handler):

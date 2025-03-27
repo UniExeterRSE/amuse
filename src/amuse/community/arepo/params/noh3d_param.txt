@@ -1,12 +1,13 @@
 %% param_Noh_3d.txt
 % parameter file for 3d Noh problem
+% TODO: SnapFormat 3 (hdf5) not working in amuse
 
 InitCondFile                          ./IC
 ICFormat                              3
 
 OutputDir                             ./output/
 SnapshotFileBase                      snap
-SnapFormat                            3
+SnapFormat                            1
 NumFilesPerSnapshot                   1
 NumFilesWrittenInParallel             1
 

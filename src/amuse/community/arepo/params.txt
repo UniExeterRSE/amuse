@@ -6,7 +6,7 @@ ICFormat                              3
 
 OutputDir                             ./output/
 SnapshotFileBase                      snap
-SnapFormat                            3
+SnapFormat                            1
 NumFilesPerSnapshot                   1
 NumFilesWrittenInParallel             1
 
