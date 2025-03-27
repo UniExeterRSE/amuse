@@ -166,6 +166,17 @@ int initialize_code(){
   begrun1(); /* set-up run  */
   // this needs to be called by "commit_parameters" in AMUSE, transitioning EDIT->RUN
 
+  return 0;
+}
+
+void read_arepo_ic() {
+  /*
+  Breaking out the read_ic functionality.
+  
+  Not expecting to use this - would need to be wired in with the dm_states and
+  gas_states workflow.
+  */
+
   char fname[MAXLEN_PATH];
   strcpy(fname, All.InitCondFile);
 
@@ -177,9 +188,6 @@ int initialize_code(){
       read_ic(fname, (RestartFlag == 14) ? 0x01 : LOAD_TYPES);
 #endif /* #ifdef READ_DM_AS_GAS #else */
 
-
-
-  return 0;
 }
 
 int run_sim() {
@@ -410,7 +418,7 @@ int new_gas_particle(int * index_of_the_particle, double mass, double x,
       state.u = u;
       gas_states.insert(std::pair<long long, gas_state>(particle_id_counter, state));
   }
-  gas_particles_in_buffer++;  // TODO: initialised?
+  gas_particles_in_buffer++;
   return 0;
 
 }
